@@ -8,9 +8,10 @@ Uses PyGame + PyOpenGL for real-time rendering and Tkinter for file dialogs.
 Controls:
   O: Open SMF model
   E: Export to OBJ
-  SPACE: Pause/Resume incremental draw
   W: Toggle wireframe
   Arrow Keys: Orbit camera left/right
+  Numpad +/-: Camera Zoom
+  SPACE: Pause/Resume incremental draw
   ESC: Quit viewer
 """
 
@@ -65,7 +66,7 @@ class SMFViewer:
         self.wireframe = True
 
         # Camera state
-        self.camera_radius = 20.0
+        self.camera_radius = 20.0    # how far we orbit from target
         self.camera_angle_az = 25.0  # degrees around Y-axis
         self.camera_height = 4.0     # height above ground
 
@@ -115,7 +116,7 @@ class SMFViewer:
                     self.draw_index += 1
                 else:
                     self.drawing = False
-            time.sleep(0.01)
+            time.sleep(0.1)
 
     # -------------------------------------------------------------------------
 
@@ -171,6 +172,10 @@ class SMFViewer:
                 self.camera_angle_az -= 1.0
             if keys[K_RIGHT]:
                 self.camera_angle_az += 1.0
+            if keys[K_KP_PLUS]:
+                self.camera_radius += 1.0
+            if keys[K_KP_MINUS]:
+                self.camera_radius -= 1.0
 
             # ---------------- Camera setup ----------------
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
