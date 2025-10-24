@@ -7,7 +7,10 @@
 
 The **SMF** (Simple Model Format) was used by **Terminal Reality**'s EVO engine, powering games like *4x4 Evolution* and *4x4 Evolution 2* in the early 2000s. These files store 3D model geometry similar to an obj or fbx. Think vertices, faces, uvs, texture references, and the lot. This viewer was made to view the vehicle SMF models.
 
-Unfortunately, SMF was never publicly documented. Every `.SMF` file was bundled inside the game’s proprietary `.POD` archive, which meant there were no clear tools to inspect or convert them — until now.
+Unfortunately, SMF was never publicly documented. Every `.SMF` file was bundled inside the game’s proprietary `.POD` archive, which meant there were no clear tools (at least for linux) to inspect or convert them — until now.
+
+**NOTE:**
+> [4x4Evolution.NET](http://www.4x4evolution.net/doku.php?id=modding_tools) has Modding Tools for use on Microsoft Windows OS by Dummiesman and Fuzzy who are part of the modding community of the game, check those out too.
 
 ---
 
@@ -25,7 +28,7 @@ Inside were filenames, binary tables, and long a sequence of multiple float-like
 
 I manually extracted several `.SMF` chunks and started noticing repeating patterns:
 
-```smf
+```yaml
 C3DModel
 4
 32
@@ -122,7 +125,7 @@ At the end, all submeshes are stored in a unified Python structure:
 | **pysmf_export.py** | Exports SMFs to multi-object .OBJ            |
 | **pysmf_print.py**  | Pretty-prints model summaries to the console |
 
-Each module is self-contained, but they all work together to provide a complete toolchain — from raw .POD data to modern, viewable 3D models.
+Each module is self-contained, but they all work together to provide a complete toolchain. I will upload the PODSMFExporter later, but you can take any SMF from the game and open it with this toolchain.
 
 ---
 
