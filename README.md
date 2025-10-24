@@ -24,6 +24,45 @@ This toolkit includes:
 
 ---
 
+## 📸 Screenshots
+
+Below are various stages of the **PySMF Viewer** and parser workflow — from command-line inspection to full 3D visualization and export.
+
+### 🔹 Initial Folder
+**Viewing parsed file structure**
+![File Structure](Screenshots/PySMF-FileStructure.png)
+
+### 🔹 Command Line Tools
+
+**Inspecting SMF structure and usage**
+![Command Usage](Screenshots/PySMF-CommandUsage.png)
+
+**SMF export utility**
+
+![Exporter](Screenshots/PySMF-Exporter.png)
+
+### 🔹 Graphical Viewer (PySMF GUI)
+
+**Initial launch — OpenGL grid and controls**
+![GUI Initial Execution](Screenshots/PySMFGUI-InitialExecution.png)
+
+**Loaded vehicle model (wireframe)**
+![Loaded Vehicle](Screenshots/PySMF-LoadedVehicle.png)
+
+**Solid fill rendering mode**
+![Solid View Mode](Screenshots/PySMF-SolidViewMode.png)
+
+### 🔹 Integration & Workflow
+
+**SMF file loader in action**
+![SMF File Loader](Screenshots/PySMF-SMFFileLoader.png)
+
+**Model exported to OBJ and imported in Blender**
+![Model Imported to Blender](Screenshots/PySMF-ModelImported2BlenderAsOBJ.png)
+
+
+---
+
 ## 🖥️ Requirements
 Install dependencies with:
 ```bash
