@@ -28,34 +28,34 @@ This toolkit includes:
 
 Below are various stages of the **PySMF Viewer** and parser workflow — from command-line inspection to full 3D visualization and export.
 
-### Initial Folder
-**Viewing parsed file structure**
+### Initial Folder<br />
+**Viewing parsed file structure**<br />
 ![File Structure](Screenshots/PySMF-FileStructure.png)
 
-### Command Line Tools
-
-**How to run it:**
+### Command Line Tools<br />
+**How to run it:**<br />
 ![Command Usage](Screenshots/PySMF-CommandUsage.png)
 
-### Graphical Viewer (PySMF GUI)
+**The Model Summary:**<br />
+![Model Summary](Screenshots/pysmf-model-summary.png)
 
-**Initial launch — OpenGL grid and controls**
+### Graphical Viewer (PySMF GUI)<br />
+**Initial launch — OpenGL grid and controls**<br />
 ![GUI Initial Execution](Screenshots/PySMFGUI-InitialExecution.png)
 
 **SMF file loader in action**<br />
 ![SMF File Loader](Screenshots/PySMF-SMFFileLoader.png)
 
-**Loaded vehicle model (wireframe)**
+**Loaded vehicle model (wireframe)**<br />
 ![Loaded Vehicle](Screenshots/PySMF-LoadedVehicle.png)
 
-**Solid fill rendering mode**
+**Solid fill rendering mode**<br />
 ![Solid View Mode](Screenshots/PySMF-SolidViewMode.png)
 
 **SMF export utility**<br />
 ![Exporter](Screenshots/PySMF-Exporter.png)
 
-### Integration & Workflow
-**Model exported to OBJ and imported in Blender**
+### Integration & Workflow - Blender<br />
 ![Model Imported to Blender](Screenshots/PySMF-ModelImported2BlenderAsOBJ.png)
 
 ---
