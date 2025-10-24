@@ -34,7 +34,7 @@ Below are various stages of the **PySMF Viewer** and parser workflow — from co
 
 ### Command Line Tools
 
-**Initial Folder Structure**
+**How to run it:**
 ![Command Usage](Screenshots/PySMF-CommandUsage.png)
 
 ### Graphical Viewer (PySMF GUI)
