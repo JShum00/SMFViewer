@@ -28,6 +28,10 @@ This toolkit includes:
 
 Below are various stages of the **PySMF Viewer** and parser workflow — from command-line inspection to full 3D visualization and export.
 
+### POD -> SMF Extractor<br />
+**Extract the SMF files from the POD files in the game directory.**
+![POD 2 SMF Extractor](Screenshots/POD2SMF.png)
+
 ### Initial Folder<br />
 **Viewing parsed file structure**<br />
 ![File Structure](Screenshots/PySMF-FileStructure.png)
