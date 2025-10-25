@@ -7,6 +7,7 @@ A reverse-engineered Python toolkit for viewing, parsing, and exporting
 **Terminal Reality .SMF model files** used in classic games like *4x4 Evolution 2*.
 
 This toolkit includes:
+- **`POD-2-SMF.py`** – simple SMF extractor, pull SMF files from POD file using CLI.
 - **`pysmf.py`** – robust SMF parser (extracts vertices, faces, textures, and submeshes)
 - **`pysmf-gui.py`** – interactive OpenGL viewer using PyGame + Tkinter
 - **`pysmf_export.py`** – multi-object OBJ exporter (Blender compatible)
