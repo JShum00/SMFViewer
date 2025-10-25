@@ -1,7 +1,7 @@
 # 🧭 Python-SMF Toolkit
 **Author:** Johnny Shumway (jShum00)
 **License:** MIT
-**Version:** 1.0
+**Version:** 1.2
 
 A reverse-engineered Python toolkit for viewing, parsing, and exporting
 **Terminal Reality .SMF model files** used in classic games like *4x4 Evolution 2*.
