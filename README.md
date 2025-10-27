@@ -73,6 +73,8 @@ pip install pygame PyOpenGL numpy
 Tkinter comes pre-installed with most Python distributions.
 Tested on Python 3.10+ (Linux).
 
+---
+
 ## 🎮 Controls
 Key             Action
 - O             Open .SMF file.
@@ -82,7 +84,9 @@ Key             Action
 - ← / →       Orbit camera, left/right.
 - ESC           Exit Viewer
 
-## 🧩 File Overview
+---
+
+## 📁 File Overview
 pysmf.py
 
 The main parser.
@@ -115,7 +119,9 @@ Textures: GMCJimmy.TIF, GMCJimmy_bump.TIF
 =========================================================================
 ```
 
-## 🧱 Example Usage
+---
+
+## 🔧 Example Usage
 Run the viewer:
 ```bash
 python3 pysmf-gui.py
@@ -129,15 +135,21 @@ Print model summary only:
 python3 pysmf_print.py
 ```
 
+---
+
 ## 🧠 Notes
 The .SMF format was used by Terminal Reality’s EVO engine (circa 2000s). 
 Models may have non-centered origins — this viewer recenters them automatically.
 Texture and bump map names are parsed but not yet applied in OpenGL.
 Wireframe is default for debugging visibility.
 
+---
+
 ## 🧬 Credits
 Reverse engineering, parser design, and viewer by Johnny Shumway (jShum00).
 Inspired by Terminal Reality’s original EVO engine file formats.
+
+---
 
 ## 📜 License
 This project is licensed under the MIT License — free for learning, modification, and redistribution.
