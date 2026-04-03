@@ -1,0 +1,14 @@
+Changes:
+
+- Reset parser state at the start of each `SMFParser.parse()` call so repeated loads do not retain old model data
+- Replaced removed ndarray `.ptp(...)` usage with supported `np.ptp(array, axis=...)` in the viewer
+- Tightened submesh header detection with a helper that accepts identifier-style names such as `Body`, `AxleR`, `Wheel_01`, and `LOD1`
+- Submesh header detection now rejects comma-delimited lines so geometry rows and count metadata are not misclassified as submesh names
+- Preserved existing parser behavior that finalizes the previous submesh before starting a new one
+- Hardened viewer vertex flattening to ignore empty submeshes before calling `np.concatenate(...)`
+- Added a safe empty-model fallback for center/size calculation when no vertex arrays are available
+- Skipped empty submeshes during OpenGL draw submission to avoid indexing/render-time errors
+- Normalized OBJ exporter UV detection so empty vertex arrays do not access `verts.shape[1]`
+- Kept OBJ `o <name>` sections for submeshes even when they contain no geometry
+- Skipped OBJ face emission for empty submeshes and invalid face records instead of relying on broad exception handling
+- Validated OBJ face indices against the current submesh vertex count before writing face references
