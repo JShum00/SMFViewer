@@ -12,6 +12,7 @@ Usage:
     python pod_smf_extract.py <input_pod> <output_dir>
 """
 
+from io import BufferedWriter
 from pathlib import Path
 
 
@@ -22,8 +23,8 @@ def extract_smfs_from_pod(pod_path: str, output_dir: str) -> None:
     output_dir.mkdir(parents=True, exist_ok=True)
 
     smf_count = 0
-    current_file = None
-    current_path = None
+    current_file: BufferedWriter | None = None
+    current_path: Path | None = None
 
     print(f"[*] Extracting SMFs from: {pod_path}")
     print(f"[*] Output directory: {output_dir}\n")
@@ -34,7 +35,8 @@ def extract_smfs_from_pod(pod_path: str, output_dir: str) -> None:
 
             # Start of a new SMF
             if stripped == b"C3DModel":
-                if current_file:
+                if current_file is not None:
+                    assert current_path is not None
                     current_file.close()
                     smf_count += 1
                     print(f"[+] Finished SMF #{smf_count:04d}: {current_path.name}")
@@ -44,7 +46,8 @@ def extract_smfs_from_pod(pod_path: str, output_dir: str) -> None:
                 current_file = current_path.open("wb")
                 print(f"[*] Started new SMF → {current_path.name}")
 
-            if current_file:
+            if current_file is not None:
+                assert current_path is not None
                 current_file.write(raw_line)
 
                 # Detect texture reference for renaming
@@ -67,7 +70,8 @@ def extract_smfs_from_pod(pod_path: str, output_dir: str) -> None:
                         print(f"[!] Warning: Failed to rename SMF: {exc}")
 
         # finalize
-        if current_file:
+        if current_file is not None:
+            assert current_path is not None
             current_file.close()
             smf_count += 1
             print(f"[+] Finished SMF #{smf_count:04d}: {current_path.name}")

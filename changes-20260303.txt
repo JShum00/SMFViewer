@@ -1,14 +1,48 @@
 Changes:
 
 - Reset parser state at the start of each `SMFParser.parse()` call so repeated loads do not retain old model data
+- Added shared `Vertex`, `Face`, `Submesh`, and `ParsedModel` type aliases / `TypedDict` definitions for the parsed SMF model structure
+- Annotated parser state and `SMFParser.parse()` so the parser, viewer, and exporter share a typed model contract
 - Replaced removed ndarray `.ptp(...)` usage with supported `np.ptp(array, axis=...)` in the viewer
 - Tightened submesh header detection with a helper that accepts identifier-style names such as `Body`, `AxleR`, `Wheel_01`, and `LOD1`
 - Submesh header detection now rejects comma-delimited lines so geometry rows and count metadata are not misclassified as submesh names
 - Preserved existing parser behavior that finalizes the previous submesh before starting a new one
+- Stored submesh `vertex_count` / `face_count` hints directly in typed submesh records instead of adding those keys later
+- Guarded parser vertex ingestion so geometry rows are skipped safely when no active submesh is open
 - Hardened viewer vertex flattening to ignore empty submeshes before calling `np.concatenate(...)`
 - Added a safe empty-model fallback for center/size calculation when no vertex arrays are available
 - Skipped empty submeshes during OpenGL draw submission to avoid indexing/render-time errors
+- Updated the viewer open-file dialog filter so the `SMF files` option matches both `*.smf` and `*.SMF`
+- Added TIFF texture loading to the viewer with Pillow-backed RGBA decode and OpenGL texture upload
+- Added `self.texture_id` viewer state plus a `Texture` sidebar button and `M` hotkey to toggle textured rendering
+- Updated the viewer startup controls text to document the new `M: Texture View` hotkey
+- Textured rendering now uses vertex UVs from parsed SMF data, enables alpha blending for TIFF opacity, and falls back to the original pale blue solid shading when texture view is off or unavailable
+- Changed automatic texture lookup to search `../ART` relative to the selected SMF using the model filename stem and common `.TIF` / `.TIFF` case variants
+- Added a manual texture fallback dialog that prompts the user to select a `.TIF` / `.TIFF` file when automatic lookup fails
+- Moved OpenGL texture deletion and upload onto the main render thread while keeping Tk dialogs and SMF parsing in a worker thread to avoid GL-context crashes during threaded loads
+- Corrected the final texture orientation by removing the vertical image flip during TIFF decode so SMF UVs map correctly in the viewer
+- Annotated `SMFViewer.model_data` and `last_loaded_path` to make optional state explicit
+- Added typed `TexturePayload` and `PendingModelLoad` aliases so threaded model/texture handoff no longer widens to `object` under Pylance
+- Annotated viewer `model_center`, `model_size`, and `texture_id` state explicitly to eliminate false-positive type warnings in camera and texture code paths
+- Replaced the viewer export path `AttributeError` fallback with an explicit `None` guard before calling `export_to_obj(...)`
+- Replaced wildcard `pygame.locals`, `OpenGL.GL`, and `OpenGL.GLU` imports with explicit symbol imports for cleaner static analysis
 - Normalized OBJ exporter UV detection so empty vertex arrays do not access `verts.shape[1]`
 - Kept OBJ `o <name>` sections for submeshes even when they contain no geometry
 - Skipped OBJ face emission for empty submeshes and invalid face records instead of relying on broad exception handling
 - Validated OBJ face indices against the current submesh vertex count before writing face references
+- Annotated POD extraction file handles and paths, then narrowed optional access with `is not None` checks and `assert` statements before member access
+- Replaced the fading right-side overlay with a persistent top toolbar so the 3D viewport now occupies the window area beneath the controls
+- Added toolbar-specific viewport/projection setup so the 3D scene renders below the toolbar instead of underneath a full-window overlay
+- Retargeted button hitboxes and click handling to a horizontal top-row layout while preserving the existing `Open`, `Export`, `Wireframe`, `Texture`, and `Exit` actions
+- Added in-window status text for the loaded file name, wireframe state, texture availability/toggle state, and paused state so core viewer state is visible without checking console output
+- Refactored overlay drawing into toolbar helper methods for button sizing, status label generation, text drawing, and shared toolbar action dispatch
+- Moved viewer status information out of the toolbar into a dedicated bottom status strip so the top bar remains action-focused
+- Updated viewport reservation so the 3D scene renders between the persistent top toolbar and bottom status strip instead of underneath either overlay
+- Added a persistent left sidebar with a simple mesh tree that shows the loaded model as a root row and each parsed submesh name as a child row
+- Added per-submesh visibility toggles with eye-icon hitboxes in the sidebar so individual submeshes can be hidden or shown without affecting the rest of the model
+- Added viewer-side submesh visibility state that resets on each new model load and is honored by the OpenGL draw loop
+- Replaced the old incremental reveal workflow with full-model rendering so sidebar visibility becomes the primary way to control which submeshes are visible
+- Changed the `SPACE` hotkey into an explicit legacy no-op after removing incremental draw, and updated the bottom status strip to report visible submesh counts instead of paused state
+- Added a dedicated parser helper for mesh-section markers like `v1` / `v2` so those lines no longer open new submesh records
+- Updated submesh header detection to keep the parent SMF mesh name such as `BushBar` as the canonical parsed submesh name while treating `v1` markers as in-block metadata
+- Corrected sidebar mesh labels and eye toggles for affected SMF files by fixing the underlying parser output instead of adding GUI-side name remapping
