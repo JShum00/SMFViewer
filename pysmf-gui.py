@@ -218,6 +218,17 @@ class SMFViewer:
 
     # -------------------------------------------------------------------------
 
+    def _create_dialog_root(self) -> Tk:
+        """Create a hidden Tk root that stays above the pygame window for dialogs."""
+        root = Tk()
+        root.withdraw()
+        root.attributes("-topmost", True)
+        root.lift()
+        root.update()
+        return root
+
+    # -------------------------------------------------------------------------
+
     def _configure_3d_viewport(self) -> None:
         """Reserve space for the toolbar and status bar and update the 3D projection."""
         viewport_height = max(1, self.height - self.toolbar_height - self.statusbar_height)
@@ -1237,6 +1248,35 @@ class SMFViewer:
 
     # -------------------------------------------------------------------------
 
+    def _prompt_for_texture_path(
+        self,
+        model_dir: str,
+        texture_dir: str,
+        prompt_message: str,
+    ) -> str:
+        """Prompt the user to select a texture file manually."""
+        prompt_root = self._create_dialog_root()
+        try:
+            should_select = messagebox.askyesno(
+                "Texture Unavailable",
+                prompt_message,
+                parent=prompt_root,
+            )
+
+            if not should_select:
+                return ""
+
+            return filedialog.askopenfilename(
+                parent=prompt_root,
+                title="Select Texture File",
+                initialdir=texture_dir if os.path.isdir(texture_dir) else model_dir,
+                filetypes=[("TIFF files", ("*.tif", "*.TIF", "*.tiff", "*.TIFF")), ("All files", "*.*")],
+            )
+        finally:
+            prompt_root.destroy()
+
+    # -------------------------------------------------------------------------
+
     def load_texture(self, smf_path: str) -> TexturePayload | None:
         """Load a texture from ../ART or prompt the user to choose one manually."""
         model_dir = os.path.dirname(smf_path)
@@ -1250,30 +1290,25 @@ class SMFViewer:
         texture_path = next((candidate for candidate in candidates if os.path.exists(candidate)), None)
         if texture_path is not None:
             print(f"Loaded texture: {texture_path}")
-            return self._decode_texture(texture_path)
+            payload = self._decode_texture(texture_path)
+            if payload is not None:
+                return payload
 
-        print(f"Warning: texture not found in {texture_dir} for model {model_name}")
-
-        prompt_root = Tk()
-        prompt_root.withdraw()
-        should_select = messagebox.askyesno(
-            "Texture Not Found",
-            "We could not find the associated texture for the model. "
-            "Would you like to select it manually?",
-            parent=prompt_root,
-        )
-
-        if not should_select:
-            prompt_root.destroy()
-            return None
-
-        texture_path = filedialog.askopenfilename(
-            parent=prompt_root,
-            title="Select Texture File",
-            initialdir=texture_dir if os.path.isdir(texture_dir) else model_dir,
-            filetypes=[("TIFF files", ("*.tif", "*.TIF", "*.tiff", "*.TIFF")), ("All files", "*.*")],
-        )
-        prompt_root.destroy()
+            print(f"Warning: auto-discovered texture could not be decoded: {texture_path}")
+            texture_path = self._prompt_for_texture_path(
+                model_dir,
+                texture_dir,
+                "We found the associated texture file, but it could not be decoded. "
+                "Would you like to select a different texture manually?",
+            )
+        else:
+            print(f"Warning: texture not found in {texture_dir} for model {model_name}")
+            texture_path = self._prompt_for_texture_path(
+                model_dir,
+                texture_dir,
+                "We could not find the associated texture for the model. "
+                "Would you like to select it manually?",
+            )
 
         if not texture_path:
             return None
@@ -1344,13 +1379,15 @@ class SMFViewer:
 
     def load_smf(self) -> None:
         """Open file dialog and load an SMF model."""
-        root = Tk()
-        root.withdraw()
-        path = filedialog.askopenfilename(
-            title="Select SMF File",
-            filetypes=[("SMF files", ("*.smf", "*.SMF")), ("All files", "*.*")]
-        )
-        root.destroy()
+        root = self._create_dialog_root()
+        try:
+            path = filedialog.askopenfilename(
+                parent=root,
+                title="Select SMF File",
+                filetypes=[("SMF files", ("*.smf", "*.SMF")), ("All files", "*.*")]
+            )
+        finally:
+            root.destroy()
         if not path:
             return
 
@@ -1414,14 +1451,16 @@ class SMFViewer:
             print("No model loaded to export.")
             return
 
-        root = Tk()
-        root.withdraw()
-        obj_path = filedialog.asksaveasfilename(
-            title="Export SMF as OBJ",
-            defaultextension=".obj",
-            filetypes=[("Wavefront OBJ", "*.obj")]
-        )
-        root.destroy()
+        root = self._create_dialog_root()
+        try:
+            obj_path = filedialog.asksaveasfilename(
+                parent=root,
+                title="Export SMF as OBJ",
+                defaultextension=".obj",
+                filetypes=[("Wavefront OBJ", "*.obj")]
+            )
+        finally:
+            root.destroy()
 
         if not obj_path:
             print("Export cancelled.")
@@ -1575,10 +1614,10 @@ class SMFViewer:
                         print("SPACE is a legacy no-op. Incremental draw has been removed.")
 
                     elif event.key == K_o:
-                        threading.Thread(target=self.load_smf, daemon=True).start()
+                        self.load_smf()
 
                     elif event.key == K_e:
-                        threading.Thread(target=self.export_obj, daemon=True).start()
+                        self.export_obj()
 
                     elif event.key == K_w:
                         self.toggle_wireframe()
