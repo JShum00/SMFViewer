@@ -16,6 +16,12 @@ Vertex = list[float]
 Face = list[int]
 
 
+class SubmeshMaterial(TypedDict):
+    values: list[str]
+    texture: str
+    raw_line: str
+
+
 class Submesh(TypedDict):
     name: str
     vertices: list[Vertex]
@@ -23,6 +29,7 @@ class Submesh(TypedDict):
     textures: list[str]
     vertex_count: int | None
     face_count: int | None
+    material: SubmeshMaterial | None
 
 
 class ParsedModel(TypedDict):
@@ -62,6 +69,22 @@ class SMFParser:
         tex = line.replace('"', '').strip()
         tex = tex.split(',')[-1].strip()
         return tex
+
+    def _parse_material_line(self, line: str) -> SubmeshMaterial | None:
+        """Parse a 5-value material line followed by a texture filename."""
+        parts = [part.strip().replace('"', '') for part in line.split(',')]
+        if len(parts) < 6:
+            return None
+
+        texture = parts[-1]
+        if not texture or ".TIF" not in texture.upper():
+            return None
+
+        return {
+            "values": parts[:5],
+            "texture": texture,
+            "raw_line": line,
+        }
 
     def _is_submesh_name(self, line: str) -> bool:
         """
@@ -159,6 +182,7 @@ class SMFParser:
                     "textures": [],
                     "vertex_count": vertex_count,
                     "face_count": face_count,
+                    "material": None,
                 }
 
                 i += 1
@@ -173,6 +197,9 @@ class SMFParser:
             if ".TIF" in line.upper():
                 tex = self._clean_tex(line)
                 if current_submesh:
+                    material = self._parse_material_line(line)
+                    if material is not None:
+                        current_submesh["material"] = material
                     # Only record textures before vertex data begins
                     if len(current_submesh["vertices"]) == 0 and tex:
                         if tex not in current_submesh["textures"]:
