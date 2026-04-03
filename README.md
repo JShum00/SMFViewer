@@ -35,7 +35,29 @@ Below are various stages of the **PySMF Viewer** and parser workflow — from co
 
 ### POD -> SMF Extractor<br />
 **Extract the SMF files from the POD files in the game directory.**
-![POD 2 SMF Extractor](Screenshots/POD2SMF.png)
+```bash
+python3 POD-2-SMF.py ../4x4Evo2/TRUCK.POD ../exportSMF/
+[*] Extracting SMFs from: ../4x4Evo2/TRUCK.POD
+[*] Output directory: ../exportSMF
+
+[*] Started new SMF → smf_0000.smf
+[↻ ] Renamed: smf_0000.smf → 31x10.smf
+[+] Finished SMF #0001: 31x10.smf
+[*] Started new SMF → smf_0001.smf
+[↻ ] Renamed: smf_0001.smf → 31x10.smf
+[+] Finished SMF #0002: 31x10.smf
+[*] Started new SMF → smf_0002.smf
+[↻ ] Renamed: smf_0002.smf → 31x10.smf
+[+] Finished SMF #0003: 31x10.smf
+[*] Started new SMF → smf_0003.smf
+[↻ ] Renamed: smf_0003.smf → 31x10.smf
+[+] Finished SMF #0004: 31x10.smf
+[*] Started new SMF → smf_0004.smf
+...
+
+[✓] Extraction complete. 320 SMFs written from TRUCK.POD → ../exportSMF
+```
+> Note: To export textures (*.TIF) and model (*.SMF) files, use my other tool PyPOD, available [here](https://github.com/JShum00/PyPOD).
 
 ### Initial Folder<br />
 **Viewing parsed file structure**<br />
@@ -43,10 +65,58 @@ Below are various stages of the **PySMF Viewer** and parser workflow — from co
 
 ### Command Line Tools<br />
 **How to run it:**<br />
-![Command Usage](Screenshots/PySMF-CommandUsage.png)
+```bash
+# Once in the VENV, do this:
+python3 pysmf-gui.py
+```
 
 **The Model Summary:**<br />
-![Model Summary](Screenshots/pysmf-model-summary.png)
+```bash
+# Example Output:
+============================ SMF MODEL SUMMARY ============================
+File: /home/jshum/Documents/exportSMF/4RUNNERLTD.smf
+Version: 4
+Submeshes: 33
+Total Vertices: 2079
+Textures: 4RUNNERLTD.TIF, 4RUNNERLTD_bump.TIF
+---------------------------------------------------------------------------
+  Body         | 490 (hdr:490) verts | 598 (hdr:598) tris | 4RUNNERLTD.TIF, 4RUNNERLTD_bump.TIF
+  Axler        | 68 (hdr:68) verts | 76 (hdr:76) tris | 4RUNNERLTD.TIF, 4RUNNERLTD_bump.TIF
+  BushBar      | 312 (hdr:312) verts | 358 (hdr:358) tris | 4RUNNERLTD.TIF, 4RUNNERLTD_bump.TIF
+  Cockpit      | 45 (hdr:45) verts | 34 (hdr:34) tris | 4RUNNERLTD.TIF, 4RUNNERLTD_bump.TIF
+  FogB2        | 47 (hdr:47) verts | 28 (hdr:28) tris | 4RUNNERLTD.TIF, 4RUNNERLTD_bump.TIF
+  FogB3        | 47 (hdr:47) verts | 28 (hdr:28) tris | 4RUNNERLTD.TIF, 4RUNNERLTD_bump.TIF
+  FogR1        | 44 (hdr:44) verts | 28 (hdr:28) tris | 4RUNNERLTD.TIF, 4RUNNERLTD_bump.TIF
+  FogR2        | 44 (hdr:44) verts | 28 (hdr:28) tris | 4RUNNERLTD.TIF, 4RUNNERLTD_bump.TIF
+  FogR3        | 44 (hdr:44) verts | 28 (hdr:28) tris | 4RUNNERLTD.TIF, 4RUNNERLTD_bump.TIF
+  FogR4        | 44 (hdr:44) verts | 28 (hdr:28) tris | 4RUNNERLTD.TIF, 4RUNNERLTD_bump.TIF
+  GlassI       | 44 (hdr:44) verts | 40 (hdr:40) tris | 4RUNNERLTD.TIF, 4RUNNERLTD_bump.TIF
+  GlassE       | 62 (hdr:62) verts | 70 (hdr:70) tris | 4RUNNERLTD.TIF, 4RUNNERLTD_bump.TIF
+  MirrorL      | 55 (hdr:55) verts | 56 (hdr:56) tris | 4RUNNERLTD.TIF, 4RUNNERLTD_bump.TIF
+  MirrorR      | 55 (hdr:55) verts | 56 (hdr:56) tris | 4RUNNERLTD.TIF, 4RUNNERLTD_bump.TIF
+  MudFlps      | 72 (hdr:72) verts | 32 (hdr:32) tris | 4RUNNERLTD.TIF, 4RUNNERLTD_bump.TIF
+  RfRack       | 104 (hdr:104) verts | 84 (hdr:84) tris | 4RUNNERLTD.TIF, 4RUNNERLTD_bump.TIF
+  RollBr1      | 52 (hdr:52) verts | 42 (hdr:42) tris | 4RUNNERLTD.TIF, 4RUNNERLTD_bump.TIF
+  Skid         | 26 (hdr:26) verts | 20 (hdr:20) tris | 4RUNNERLTD.TIF, 4RUNNERLTD_bump.TIF
+  UndBody      | 146 (hdr:146) verts | 130 (hdr:130) tris | 4RUNNERLTD.TIF, 4RUNNERLTD_bump.TIF
+  WiperLT      | 28 (hdr:28) verts | 16 (hdr:16) tris | 4RUNNERLTD.TIF, 4RUNNERLTD_bump.TIF
+  WiperRR      | 33 (hdr:33) verts | 22 (hdr:22) tris | 4RUNNERLTD.TIF, 4RUNNERLTD_bump.TIF
+  WiperRT      | 30 (hdr:30) verts | 16 (hdr:16) tris | 4RUNNERLTD.TIF, 4RUNNERLTD_bump.TIF
+  Winch        | 64 (hdr:64) verts | 38 (hdr:38) tris | 4RUNNERLTD.TIF, 4RUNNERLTD_bump.TIF
+  Snorkel      | 41 (hdr:41) verts | 47 (hdr:47) tris | 4RUNNERLTD.TIF, 4RUNNERLTD_bump.TIF
+  LightFL      | 4 (hdr:4) verts | 2 (hdr:2) tris | 4RUNNERLTD.TIF, 4RUNNERLTD_bump.TIF
+  LightFR      | 4 (hdr:4) verts | 2 (hdr:2) tris | 4RUNNERLTD.TIF, 4RUNNERLTD_bump.TIF
+  LightHL      | 9 (hdr:9) verts | 8 (hdr:8) tris | 4RUNNERLTD.TIF, 4RUNNERLTD_bump.TIF
+  LightHR      | 9 (hdr:9) verts | 8 (hdr:8) tris | 4RUNNERLTD.TIF, 4RUNNERLTD_bump.TIF
+  LightBL      | 13 (hdr:13) verts | 9 (hdr:9) tris | 4RUNNERLTD.TIF, 4RUNNERLTD_bump.TIF
+  LightBR      | 13 (hdr:13) verts | 9 (hdr:9) tris | 4RUNNERLTD.TIF, 4RUNNERLTD_bump.TIF
+  LightRL      | 13 (hdr:13) verts | 9 (hdr:9) tris | 4RUNNERLTD.TIF, 4RUNNERLTD_bump.TIF
+  LightRR      | 13 (hdr:13) verts | 9 (hdr:9) tris | 4RUNNERLTD.TIF, 4RUNNERLTD_bump.TIF
+  LightBC      | 4 (hdr:4) verts | 2 (hdr:2) tris | 4RUNNERLTD.TIF, 4RUNNERLTD_bump.TIF
+=========================================================================
+
+Loaded 2079 vertices and 1961 faces from /home/jshum/Documents/exportSMF/4RUNNERLTD.smf
+```
 
 ### Graphical Viewer (PySMF GUI)<br />
 **Initial launch — OpenGL grid and controls**<br />
@@ -60,6 +130,9 @@ Below are various stages of the **PySMF Viewer** and parser workflow — from co
 
 **Solid fill rendering mode**<br />
 ![Solid View Mode](Screenshots/PySMF-SolidViewMode.png)
+
+**Texture rendering mode**
+![Texture View Mode](Screenshots/PySMF-TextureViewMode.png)
 
 **SMF export utility**<br />
 ![Exporter](Screenshots/PySMF-Exporter.png)
@@ -77,7 +150,7 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 Tkinter comes pre-installed with most Python distributions.
-Tested on Python 3.10+ (Linux).
+Tested on Python 3.12+ (Linux).
 
 ---
 
