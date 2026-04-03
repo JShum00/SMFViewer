@@ -136,6 +136,24 @@ python3 pysmf-gui.py
 ```
 
 Export a model:
+Tkinter comes pre-installed with most Python distributions.
+Tested on Python 3.10+ (Linux).
+
+---
+
+## 🎮 Controls
+Key             Action
+- O             Open .SMF file.
+- E             Export current model to .OBJ
+- W             Toggle wireframe/solid.
+- SPACE         Pause or resume progressive drawing.
+- ← / →       Orbit camera, left/right.
+- ESC           Exit Viewer
+
+---
+
+## 📁 File Overview
+pysmf.py
 
 ```bash
 python3 pysmf_export.py
@@ -169,6 +187,45 @@ Textures: GMCJimmy.TIF, GMCJimmy_bump.TIF
 - Bump map references are preserved as filenames, but the viewer does not implement real bump mapping.
 - TIFF image alpha is used in the viewer when texture rendering is enabled.
 - The inspector and grouped material analysis are designed to help the community infer the format more accurately over time.
+---
+
+## 🔧 Example Usage
+Run the viewer:
+```bash
+python3 pysmf-gui.py
+```
+Standalone export:
+```bash
+python3 pysmf-export.py
+```
+Print model summary only:
+```bash
+python3 pysmf_print.py
+```
+
+---
+
+## 🧠 Notes
+The .SMF format was used by Terminal Reality’s EVO engine (circa 2000s). 
+Models may have non-centered origins — this viewer recenters them automatically.
+Texture and bump map names are parsed but not yet applied in OpenGL.
+Wireframe is default for debugging visibility.
+
+---
+
+## 🧬 Credits
+Reverse engineering, parser design, and viewer by Johnny Shumway (jShum00).
+Inspired by Terminal Reality’s original EVO engine file formats.
+
+---
+
+## 📜 License
+This project is licensed under the MIT License — free for learning, modification, and redistribution.
+
+# The MIT License (MIT)
+Copyright © 2025 **Johnny Shumway**
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
 ## Screenshots
 Existing screenshots in `Screenshots/` still cover the project history, but some UI images may now lag behind the current multi-panel viewer. The current GUI includes a grouped left mesh tree, right-side inspector, bottom status strip, and top toolbar.
