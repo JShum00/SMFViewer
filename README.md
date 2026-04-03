@@ -1,75 +1,141 @@
-# 🧭 Python-SMF Toolkit
-**Author:** Johnny Shumway (jShum00)
+# PySMF Toolkit
+
+**Author:** Johnny Shumway (`jShum00`)  
 **License:** MIT
-**Version:** 1.2
 
-A reverse-engineered Python toolkit for viewing, parsing, and exporting
-**Terminal Reality .SMF model files** used in classic games like *4x4 Evolution 2*.
+PySMF is a reverse-engineered Python toolkit for inspecting, viewing, and exporting **Terminal Reality `.SMF` model files** used by games such as *4x4 Evolution* and *4x4 Evolution 2*.
 
-This toolkit includes:
-- **`POD-2-SMF.py`** – simple SMF extractor, pull SMF files from POD file using CLI.
-- **`pysmf.py`** – robust SMF parser (extracts vertices, faces, textures, and submeshes)
-- **`pysmf-gui.py`** – interactive OpenGL viewer using PyGame + Tkinter
-- **`pysmf_export.py`** – multi-object OBJ exporter (Blender compatible)
-- **`pysmf_print.py`** – formatted model summary printer
+The toolkit currently includes:
+- `POD-2-SMF.py` – extracts SMF data from POD archives
+- `pysmf.py` – parses SMF models into typed Python structures
+- `pysmf-gui.py` – interactive OpenGL viewer and research UI
+- `pysmf_export.py` – exports SMF geometry to multi-object OBJ
+- `pysmf_print.py` – prints a structured model summary to the console
 
----
+## Features
+- Loads and displays `.SMF` models in real time with PyGame + PyOpenGL
+- Supports textured and wireframe viewing
+- Automatically finds matching `.TIF` / `.TIFF` textures in `../ART` when available
+- Provides a grouped, scrollable mesh tree with per-submesh visibility toggles
+- Shows a right-side inspector for selected submeshes
+- Preserves and exposes the unknown 5-value material tuple stored near each `v1` block
+- Lets you experiment with those values in-session without writing back to disk
+- Shows model-wide material tuple grouping to help compare repeated patterns across submeshes
+- Exports SMFs to Blender-friendly multi-object `.OBJ`
 
-## 🚀 Features
-- Loads and displays `.SMF` models in real time
-- Orbiting camera (arrow keys)
-- Progressive submesh draw with pause/resume
-- Wireframe toggle
-- Direct export to multi-object `.OBJ`
-- Human-readable SMF data summary printed to console
+## Current Viewer Layout
+The GUI now uses a multi-panel layout:
 
----
+- Top toolbar: `Open`, `Export`, `Wireframe`, `Texture`, `Exit`, `Opacity`
+- Left sidebar: grouped mesh tree with expand/collapse arrows and eye toggles
+- Center viewport: OpenGL model view
+- Right inspector: selected-submesh details, material tuple research, and heuristic preview state
+- Bottom status strip: current file, wireframe state, texture state, assumed opacity state, visible-submesh count
 
-## 📸 Screenshots
+The main window is resizable and uses native OS maximize/minimize controls.
 
-Below are various stages of the **PySMF Viewer** and parser workflow — from command-line inspection to full 3D visualization and export.
-
-### POD -> SMF Extractor<br />
-**Extract the SMF files from the POD files in the game directory.**
-![POD 2 SMF Extractor](Screenshots/POD2SMF.png)
-
-### Initial Folder<br />
-**Viewing parsed file structure**<br />
-![File Structure](Screenshots/PySMF-FileStructure.png)
-
-### Command Line Tools<br />
-**How to run it:**<br />
-![Command Usage](Screenshots/PySMF-CommandUsage.png)
-
-**The Model Summary:**<br />
-![Model Summary](Screenshots/pysmf-model-summary.png)
-
-### Graphical Viewer (PySMF GUI)<br />
-**Initial launch — OpenGL grid and controls**<br />
-![GUI Initial Execution](Screenshots/PySMFGUI-InitialExecution.png)
-
-**SMF file loader in action**<br />
-![SMF File Loader](Screenshots/PySMF-SMFFileLoader.png)
-
-**Loaded vehicle model (wireframe)**<br />
-![Loaded Vehicle](Screenshots/PySMF-LoadedVehicle.png)
-
-**Solid fill rendering mode**<br />
-![Solid View Mode](Screenshots/PySMF-SolidViewMode.png)
-
-**SMF export utility**<br />
-![Exporter](Screenshots/PySMF-Exporter.png)
-
-### Integration & Workflow - Blender<br />
-![Model Imported to Blender](Screenshots/PySMF-ModelImported2BlenderAsOBJ.png)
-
----
-
-## 🖥️ Requirements
+## Requirements
 Install dependencies with:
+
 ```bash
-pip install pygame PyOpenGL numpy
+pip install pygame PyOpenGL numpy Pillow
 ```
+
+Tkinter ships with most Python distributions.
+
+Tested on Python 3.10+ under Linux.
+
+## Controls
+Keyboard:
+
+- `O` – open an `.SMF` file
+- `E` – export the current model to `.OBJ`
+- `W` – toggle wireframe / solid rendering
+- `M` – toggle texture view
+- `Left` / `Right` – orbit camera
+- `Numpad +` / `Numpad -` – zoom
+- `Space` – legacy no-op
+- `Esc` – quit
+
+Mouse / UI:
+
+- Click group arrows in the left sidebar to expand/collapse mesh groups
+- Click mesh rows to select a submesh
+- Click eye icons to hide/show individual submeshes
+- Use the mouse wheel or scrollbar thumb to scroll the grouped mesh tree
+- Click material fields in the inspector to edit them
+- Press `Enter` in an active field to commit that one field to the **heuristic** live preview
+
+## What The Toolkit Understands Today
+PySMF currently handles these parts of the format with reasonable confidence:
+
+- file header such as `C3DModel`
+- format version
+- submesh names like `Body`, `GlassE`, `LightFL`
+- per-submesh vertex and face count hints
+- vertex rows with 8 values:
+  - position `x, y, z`
+  - normal `nx, ny, nz`
+  - UV `u, v`
+- face rows with 3 indices
+- texture references
+- the `v1`-adjacent material line:
+  - 5 raw values
+  - texture filename
+  - original raw line for inspection
+
+## Experimental Material Research
+The viewer now treats the 5-value line after a `v1` marker as **research data**, not settled truth.
+
+For example:
+
+```text
+1,1,64,0,1,4RUNNERLTD.TIF
+```
+
+What PySMF does with this today:
+- preserves the raw 5 values exactly
+- shows them in the inspector
+- groups matching tuples across the model
+- allows session-only editing
+- offers a **heuristic preview** path for experimentation
+
+What PySMF does **not** claim yet:
+- the final semantics of each field
+- exact parity with the game’s renderer
+- correct transparency/material behavior for all models
+
+The `Opacity` toolbar toggle controls whether the viewer uses the current SMF-based heuristic opacity assumptions or renders textured meshes without those assumed alpha adjustments.
+
+## Heuristic Assumptions In The Viewer
+The current live preview is intentionally conservative and experimental:
+
+- `Value 2` is treated as an opacity multiplier
+- `Value 4` and `Value 5` are treated as local transparency-related toggles
+- `Value 1` and `Value 3` are preserved and shown, but not strongly interpreted yet
+
+This is a research aid, not a final renderer.
+
+## Mesh Grouping In The Sidebar
+The viewer currently auto-groups obvious name families:
+
+- `Fog*` -> `Foglights`
+- `Glass*` -> `Glass`
+- `Light*` -> `Lights`
+- `Mirror*` -> `Mirrors`
+- `Wiper*` -> `Wipers`
+- everything else -> `Other`
+
+These groups are UI-only and do not change parsing or export behavior.
+
+## Example Usage
+Run the viewer:
+
+```bash
+python3 pysmf-gui.py
+```
+
+Export a model:
 Tkinter comes pre-installed with most Python distributions.
 Tested on Python 3.10+ (Linux).
 
@@ -89,22 +155,18 @@ Key             Action
 ## 📁 File Overview
 pysmf.py
 
-The main parser.
-Reads .SMF line-by-line, reconstructs submeshes, textures, and geometry.
+```bash
+python3 pysmf_export.py
+```
 
-pysmf-gui.py
+Print a model summary:
 
-OpenGL viewer built with PyGame and PyOpenGL.
-Uses an orbit camera, grid, and incremental draw thread.
+```bash
+python3 pysmf_print.py
+```
 
-pysmf_export.py
-
-Converts .SMF → .OBJ, keeping each submesh as a distinct object.
-Produces clean, Blender-importable geometry.
-
-pysmf_print.py
-
-Prints structured summary data to the console automatically when models are loaded:
+## Example Summary Output
+`pysmf_print.py` prints a structured overview such as:
 
 ```yaml
 ============================ SMF MODEL SUMMARY ============================
@@ -119,6 +181,12 @@ Textures: GMCJimmy.TIF, GMCJimmy_bump.TIF
 =========================================================================
 ```
 
+## Notes
+- Models may have off-center origins; the viewer recenters them for inspection.
+- The parser now treats `v1`, `v2`, etc. as mesh-section markers, not as submesh names.
+- Bump map references are preserved as filenames, but the viewer does not implement real bump mapping.
+- TIFF image alpha is used in the viewer when texture rendering is enabled.
+- The inspector and grouped material analysis are designed to help the community infer the format more accurately over time.
 ---
 
 ## 🔧 Example Usage
@@ -159,6 +227,8 @@ Copyright © 2025 **Johnny Shumway**
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+## Screenshots
+Existing screenshots in `Screenshots/` still cover the project history, but some UI images may now lag behind the current multi-panel viewer. The current GUI includes a grouped left mesh tree, right-side inspector, bottom status strip, and top toolbar.
 
-THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+## License
+This project is licensed under the MIT License.

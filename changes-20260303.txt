@@ -1,0 +1,74 @@
+# Changelog
+
+All notable changes to PySMF are documented in this file.
+
+## 2026-03-03
+
+### Added
+- Added shared `Vertex`, `Face`, `Submesh`, and `ParsedModel` type aliases / `TypedDict` definitions for the parsed SMF model structure.
+- Added typed `TexturePayload` and `PendingModelLoad` aliases so threaded model/texture handoff no longer widens to `object` under Pylance.
+- Added TIFF texture loading to the viewer with Pillow-backed RGBA decode and OpenGL texture upload.
+- Added `self.texture_id` viewer state plus a `Texture` toolbar button and `M` hotkey to toggle textured rendering.
+- Added a manual texture fallback dialog that prompts the user to select a `.TIF` / `.TIFF` file when automatic lookup fails.
+- Added a safe empty-model fallback for center/size calculation when no vertex arrays are available.
+- Added a persistent top toolbar so the 3D viewport now occupies the window area beneath the controls.
+- Added a dedicated bottom status strip so the top bar remains action-focused.
+- Added a persistent left sidebar with a mesh tree and per-submesh eye toggles.
+- Added viewer-side submesh visibility state that resets on each new model load and is honored by the OpenGL draw loop.
+- Added typed per-submesh material metadata so the parser preserves the raw six-part `v1` material line, including the five unknown values, the texture filename, and the original raw line for inspection.
+- Added a persistent right-side submesh inspector panel that shows the selected submesh name, texture name, parsed raw material line, and current session-only material line.
+- Added session-only editing for the five unknown SMF material values with keyboard text input in the inspector.
+- Added committed per-submesh preview state in the viewer so raw inspector edits stay separate from the currently applied rendering assumptions.
+- Added inspector status text and committed-preview display so it is clear which material values are typed in versus actually submitted to the live preview.
+- Added model-wide exact-tuple grouping for parsed submesh material values so the viewer can classify matching material patterns within the currently loaded SMF.
+- Added neutral pattern-analysis output in the inspector including parsed tuple display, group ID, evidence note, match count, and the names of other submeshes that share the same raw value tuple.
+- Added resize handling with a minimum window size clamp so the toolbar, sidebar, viewport, inspector, and status strip stay usable after window resizes or maximize/restore actions.
+- Added scroll state, scrollbar track/thumb rendering, mouse-wheel scrolling, and thumb dragging for the left mesh tree so long submesh lists remain accessible.
+- Added collapsed-by-default group headers with arrow hit targets in the sidebar so grouped mesh families can be expanded or collapsed.
+- Added a right-aligned `Opacity` toolbar button plus status-strip state so assumed SMF opacity handling can be toggled on or off at runtime.
+
+### Changed
+- Reset parser state at the start of each `SMFParser.parse()` call so repeated loads do not retain old model data.
+- Annotated parser state and `SMFParser.parse()` so the parser, viewer, and exporter share a typed model contract.
+- Tightened submesh header detection with a helper that accepts identifier-style names such as `Body`, `AxleR`, `Wheel_01`, and `LOD1`.
+- Updated submesh header detection to keep the parent SMF mesh name such as `BushBar` as the canonical parsed submesh name while treating `v1` markers as in-block metadata.
+- Stored submesh `vertex_count` / `face_count` hints directly in typed submesh records instead of adding those keys later.
+- Updated the viewer open-file dialog filter so the `SMF files` option matches both `*.smf` and `*.SMF`.
+- Textured rendering now uses vertex UVs from parsed SMF data, enables alpha blending for TIFF opacity, and falls back to the original pale blue solid shading when texture view is off or unavailable.
+- Changed automatic texture lookup to search `../ART` relative to the selected SMF using the model filename stem and common `.TIF` / `.TIFF` case variants.
+- Moved OpenGL texture deletion and upload onto the main render thread while keeping Tk dialogs and SMF parsing in a worker thread to avoid GL-context crashes during threaded loads.
+- Annotated `SMFViewer.model_data`, `last_loaded_path`, `model_center`, `model_size`, and `texture_id` state explicitly to eliminate false-positive type warnings in viewer code paths.
+- Replaced wildcard `pygame.locals`, `OpenGL.GL`, and `OpenGL.GLU` imports with explicit symbol imports for cleaner static analysis.
+- Replaced the fading right-side overlay with a structured UI layout made up of a top toolbar, bottom status strip, left mesh sidebar, and right inspector panel.
+- Retargeted button hitboxes and click handling to a horizontal top-row layout while preserving the existing `Open`, `Export`, `Wireframe`, `Texture`, and `Exit` actions.
+- Replaced the old incremental reveal workflow with full-model rendering so sidebar visibility becomes the primary way to control which submeshes are visible.
+- Changed the `SPACE` hotkey into an explicit legacy no-op after removing incremental draw.
+- Kept the existing texture list behavior while storing parsed material values separately instead of overloading `textures`.
+- Added left-sidebar row selection for submeshes while preserving the existing eye-icon visibility toggles as a separate click target.
+- Reframed the inspector so pattern analysis is presented as the primary research tool and the existing live preview is explicitly labeled as heuristic and secondary.
+- Switched the OpenGL window to a resizable native Pygame window so maximize/minimize are handled by the operating system title bar instead of custom in-app controls.
+- Replaced the flat left mesh list with a grouped tree view that buckets obvious name-prefix families into `Foglights`, `Glass`, `Lights`, `Mirrors`, `Wipers`, and `Other`.
+- Updated the scrollable sidebar logic so content height, hitboxes, and visible rows now account for both group headers and expanded child submesh rows.
+- Renamed the application window caption from `SMF Viewer` to `PySMF - SMF Viewer`.
+
+### Fixed
+- Replaced removed ndarray `.ptp(...)` usage with supported `np.ptp(array, axis=...)` in the viewer.
+- Submesh header detection now rejects comma-delimited lines so geometry rows and count metadata are not misclassified as submesh names.
+- Preserved existing parser behavior that finalizes the previous submesh before starting a new one.
+- Guarded parser vertex ingestion so geometry rows are skipped safely when no active submesh is open.
+- Hardened viewer vertex flattening to ignore empty submeshes before calling `np.concatenate(...)`.
+- Skipped empty submeshes during OpenGL draw submission to avoid indexing/render-time errors.
+- Corrected the final texture orientation by removing the vertical image flip during TIFF decode so SMF UVs map correctly in the viewer.
+- Replaced the viewer export path `AttributeError` fallback with an explicit `None` guard before calling `export_to_obj(...)`.
+- Normalized OBJ exporter UV detection so empty vertex arrays do not access `verts.shape[1]`.
+- Kept OBJ `o <name>` sections for submeshes even when they contain no geometry.
+- Skipped OBJ face emission for empty submeshes and invalid face records instead of relying on broad exception handling.
+- Validated OBJ face indices against the current submesh vertex count before writing face references.
+- Annotated POD extraction file handles and paths, then narrowed optional access with `is not None` checks and `assert` statements before member access.
+- Added a dedicated parser helper for mesh-section markers like `v1` / `v2` so those lines no longer open new submesh records.
+- Corrected sidebar mesh labels and eye toggles for affected SMF files by fixing the underlying parser output instead of adding GUI-side name remapping.
+- Documented in the inspector that current texture opacity still comes from the TIFF image alpha channel and standard OpenGL blending rather than any interpreted SMF material flags.
+- Pressing `Enter` in an active inspector field now commits that single field for the selected submesh and updates the textured preview immediately without writing back to the SMF.
+- Applied a first-pass experimental interpretation of the material fields where Value 2 drives opacity and Values 4 and 5 toggle additional transparency treatment for textured rendering.
+- Made sidebar row and eye hitboxes scroll-aware so selection and visibility toggles continue to map to the correct visible rows while the tree is scrolled.
+- When the `Opacity` toggle is off, the textured render path now keeps texture colors neutral and opaque instead of inheriting the previous OpenGL tint color state.

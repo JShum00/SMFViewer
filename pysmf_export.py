@@ -36,6 +36,8 @@ def export_to_obj(smf_path, obj_path):
             name = sm.get('name', f"Submesh_{sm_index}")
             verts = np.array(sm['vertices'])
             faces = sm['faces']
+            has_uv = (verts.ndim == 2 and verts.shape[1] >= 8)
+            vert_count = len(verts)
 
             f.write(f"o {name}\n")
 
@@ -44,20 +46,29 @@ def export_to_obj(smf_path, obj_path):
                 f.write(f"v {v[0]} {v[1]} {v[2]}\n")
 
             # Write texture coordinates if present (UVs)
-            if verts.shape[1] >= 8:
+            if has_uv:
                 for v in verts:
                     f.write(f"vt {v[6]} {1.0 - v[7]}\n")  # flip V for Blender
 
             # Write triangle faces (OBJ indices start at 1)
-            for face in faces:
-                try:
-                    i1, i2, i3 = [vi + 1 + vertex_offset for vi in face]
-                    if verts.shape[1] >= 8:
+            if vert_count > 0:
+                for face in faces:
+                    if len(face) < 3:
+                        continue
+
+                    try:
+                        indices = [int(vi) for vi in face[:3]]
+                    except (TypeError, ValueError):
+                        continue
+
+                    if any(vi < 0 or vi >= vert_count for vi in indices):
+                        continue
+
+                    i1, i2, i3 = [vi + 1 + vertex_offset for vi in indices]
+                    if has_uv:
                         f.write(f"f {i1}/{i1} {i2}/{i2} {i3}/{i3}\n")
                     else:
                         f.write(f"f {i1} {i2} {i3}\n")
-                except Exception:
-                    continue
 
             vertex_offset += len(verts)
             f.write("\n")
@@ -92,4 +103,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
