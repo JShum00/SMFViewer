@@ -1,5 +1,6 @@
 # Local tooling
 .codex/
+.codex
 
 # Python bytecode and caches
 __pycache__/
