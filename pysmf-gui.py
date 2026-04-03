@@ -10,8 +10,13 @@ Controls:
   E: Export to OBJ
   W: Toggle wireframe
   M: Texture View
-  Arrow Keys: Orbit camera left/right
+  Left/Right: Orbit camera left/right
+  Up/Down: Camera Zoom
+  CTRL + Left/Right: Fast orbit (2x speed)
+  CTRL + Up/Down: Fast camera zoom
   Numpad +/-: Camera Zoom
+  Right Mouse Drag: Orbit camera left/right
+  Mouse Wheel: Camera Zoom
   SPACE: Legacy no-op
   ESC: Quit viewer
 """
@@ -77,13 +82,16 @@ from OpenGL.GLUT import glutInit, glutBitmapCharacter, GLUT_BITMAP_HELVETICA_18 
 from pygame.locals import (
     DOUBLEBUF,
     KEYDOWN,
+    KMOD_CTRL,
     K_BACKSPACE,
+    K_DOWN,
     K_ESCAPE,
     K_KP_MINUS,
     K_KP_ENTER,
     K_KP_PLUS,
     K_LEFT,
     K_RIGHT,
+    K_UP,
     K_RETURN,
     K_SPACE,
     K_TAB,
@@ -185,6 +193,7 @@ class SMFViewer:
         self.sidebar_scrollbar_thumb: tuple[int, int, int, int] | None = None
         self.dragging_sidebar_thumb = False
         self.sidebar_drag_offset = 0.0
+        self.dragging_camera_orbit = False
         self.material_field_rects: list[tuple[int, int, int, int]] = []
         self.hover_material_field_index: int | None = None
 
@@ -216,6 +225,24 @@ class SMFViewer:
         self.camera_radius = 20.0    # how far we orbit from target
         self.camera_angle_az = 25.0  # degrees around Y-axis
         self.camera_height = 4.0     # height above ground
+        self.camera_min_radius = 2.0
+        self.camera_zoom_step = 1.0
+        self.camera_fast_zoom_step = 2.0
+        self.camera_orbit_step = 1.0
+
+    # -------------------------------------------------------------------------
+
+    def _adjust_camera_zoom(self, delta: float) -> None:
+        """Apply a signed zoom delta while keeping the camera radius valid."""
+        self.camera_radius = max(self.camera_min_radius, self.camera_radius + delta)
+
+    # -------------------------------------------------------------------------
+
+    def _set_camera_orbit_drag(self, active: bool) -> None:
+        """Toggle relative-motion orbit drag mode for the right mouse button."""
+        self.dragging_camera_orbit = active
+        pygame.mouse.set_visible(not active)
+        pygame.event.set_grab(active)
 
     # -------------------------------------------------------------------------
 
@@ -1539,6 +1566,8 @@ class SMFViewer:
                         max_scroll = max(0.0, self.sidebar_content_height - self.sidebar_visible_height)
                         self.sidebar_scroll_offset = 0.0 if travel <= 0 or max_scroll <= 0 else ((clamped_top - track_top) / travel) * max_scroll
                         self._clamp_sidebar_scroll()
+                    elif self.dragging_camera_orbit and event.rel[0] != 0:
+                        self.camera_angle_az += math.copysign(self.camera_orbit_step, event.rel[0])
                     # Hover state is recomputed from scratch each frame rather than
                     # incrementally tracking overlapping hitboxes.
                     self.hover_index = None
@@ -1619,11 +1648,17 @@ class SMFViewer:
                             self.active_material_field_index = None
                 elif event.type == MOUSEBUTTONUP and event.button == 1:
                     self.dragging_sidebar_thumb = False
+                elif event.type == MOUSEBUTTONDOWN and event.button == 3:
+                    self._set_camera_orbit_drag(True)
+                elif event.type == MOUSEBUTTONUP and event.button == 3:
+                    self._set_camera_orbit_drag(False)
                 elif event.type == MOUSEBUTTONDOWN and event.button in (4, 5):
                     mx, my = event.pos
                     sidebar_hovered = 0 <= mx <= self.sidebar_width and self.toolbar_height <= my <= (self.height - self.statusbar_height)
                     if sidebar_hovered:
                         self._scroll_sidebar(-40 if event.button == 4 else 40)
+                    else:
+                        self._adjust_camera_zoom(-self.camera_zoom_step if event.button == 4 else self.camera_zoom_step)
                 elif event.type == TEXTINPUT:
                     if (
                         self.selected_submesh_index is not None
@@ -1670,14 +1705,24 @@ class SMFViewer:
             # ---------------- Continuous input ----------------
             # Camera motion is polled each frame so held keys feel continuous.
             keys = pygame.key.get_pressed()
+            ctrl_held = bool(pygame.key.get_mods() & KMOD_CTRL)
+            orbit_step = self.camera_orbit_step * (2.0 if ctrl_held else 1.0)
             if keys[K_LEFT]:
-                self.camera_angle_az -= 1.0
+                self.camera_angle_az -= orbit_step
             if keys[K_RIGHT]:
-                self.camera_angle_az += 1.0
+                self.camera_angle_az += orbit_step
             if keys[K_KP_PLUS]:
-                self.camera_radius += 1.0
+                self._adjust_camera_zoom(self.camera_zoom_step)
             if keys[K_KP_MINUS]:
-                self.camera_radius -= 1.0            
+                self._adjust_camera_zoom(-self.camera_zoom_step)
+            if ctrl_held and keys[K_UP]:
+                self._adjust_camera_zoom(-self.camera_fast_zoom_step)
+            elif keys[K_UP]:
+                self._adjust_camera_zoom(-self.camera_zoom_step)
+            if ctrl_held and keys[K_DOWN]:
+                self._adjust_camera_zoom(self.camera_fast_zoom_step)
+            elif keys[K_DOWN]:
+                self._adjust_camera_zoom(self.camera_zoom_step)
 
             # ---------------- Camera setup ----------------
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT) # pyright: ignore[reportOperatorIssue]
@@ -1763,6 +1808,7 @@ class SMFViewer:
             pygame.display.flip()
             clock.tick(60)
 
+        self._set_camera_orbit_drag(False)
         pygame.quit()
 
 

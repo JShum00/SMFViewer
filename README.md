@@ -19,7 +19,9 @@ This toolkit includes:
 - Loads and displays `.SMF` models in real time
 - Supports textured and wireframe viewing
 - Automatically finds matching `.TIF` / `.TIFF` textures in `../ART` when available
-- Orbiting camera (arrow keys)
+- Orbiting camera with standard and fast controls (`← / →`, `CTRL + ← / →`)
+- Camera zoom via mouse wheel, slow `↑ / ↓`, fast `CTRL + ↑ / ↓`, and `Numpad +/-`
+- Right-click drag orbit in the 3D viewer with cursor lock while held
 - Grouped, scrollable mesh tree with per-submesh visibility toggles
 - Right-side inspector for selected submeshes
 - Preserves and exposes the unknown 5-value material tuple stored near each `v1` block
@@ -165,14 +167,19 @@ Key             | Action
 `W`             | Toggle wireframe/solid
 `M`             | Toggle texture view
 `← / →`        | Orbit camera left/right
+`↑ / ↓`        | Zoom in/out at standard speed
+`CTRL + ← / →` | Orbit camera left/right at 2x speed
+`CTRL + ↑ / ↓` | Zoom in/out at 2x speed
 `Numpad +/-`    | Zoom in/out
 `ESC`           | Exit Viewer
 
 **Mouse / UI:**
+- Hold right-click and drag left/right to orbit the camera; the cursor is hidden and locked to the window while held
 - Click group arrows in the left sidebar to expand/collapse mesh groups
 - Click mesh rows to select a submesh
 - Click eye icons to hide/show individual submeshes
-- Use the mouse wheel or scrollbar to scroll the grouped mesh tree
+- Use the mouse wheel to zoom the camera, or to scroll the grouped mesh tree when hovering the left sidebar
+- Drag the scrollbar to scroll the grouped mesh tree
 - Click material fields in the inspector to edit them
 - Press `Enter` in an active field to commit it to the **heuristic** live preview
 
