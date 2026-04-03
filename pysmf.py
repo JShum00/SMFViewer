@@ -9,8 +9,12 @@ Each SMF file is read line-by-line with defensive parsing to handle small format
 The resulting data can be consumed by the SMF Viewer or exported to other 3D formats.
 """
 
+import re
+
 class SMFParser:
     """Parser for Terminal Reality .SMF files."""
+
+    _SUBMESH_NAME_RE = re.compile(r'^[A-Za-z][A-Za-z0-9_]*$')
 
     def __init__(self):
         """Initialize storage for parsed model data."""
@@ -36,6 +40,18 @@ class SMFParser:
         tex = tex.split(',')[-1].strip()
         return tex
 
+    def _is_submesh_name(self, line: str) -> bool:
+        """
+        Return True when a line looks like a valid submesh identifier.
+
+        Valid names start with a letter and may continue with letters,
+        digits, or underscores. Comma-delimited lines are always rejected
+        to avoid matching geometry rows or count metadata.
+        """
+        if ',' in line:
+            return False
+        return bool(self._SUBMESH_NAME_RE.fullmatch(line))
+
     # -------------------------------------------------------------------------
 
     def parse(self, path: str) -> dict:
@@ -55,6 +71,12 @@ class SMFParser:
                     "textures": [...]
                 }
         """
+        self.vertices = []
+        self.submeshes = []
+        self.textures = []
+        self.version = None
+        self.header = {}
+
         with open(path, 'r', encoding='utf-8', errors='ignore') as f:
             lines = [ln.strip() for ln in f if ln.strip()]
 
@@ -80,8 +102,8 @@ class SMFParser:
                 continue
 
             # ---------------- Submesh block start ----------------
-            # Submesh names are alphabetic tokens (e.g., "Body", "AxleR")
-            if line.isalpha():
+            # Submesh names are identifier-like tokens (e.g., "Body", "Wheel_01")
+            if self._is_submesh_name(line):
                 if current_submesh:
                     self.submeshes.append(current_submesh)
 
@@ -196,4 +218,3 @@ class SMFParser:
             "submeshes": self.submeshes,
             "textures": self.textures,
         }
-

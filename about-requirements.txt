@@ -1,0 +1,19 @@
+🔢 Versions:
+    pygame      >= 2.5.2
+    PyOpenGL    >= 3.1.7
+    numpy       >= 1.26.4
+
+🧠 Notes:
+    pygame handles the window, event loop, and OpenGL context.
+
+    PyOpenGL is the OpenGL wrapper for Python — required by your viewer.
+
+    numpy is used for vertex math, array handling, and scale computations.
+
+    Tkinter is part of the Python standard library, so it doesn’t need to be listed.
+
+If you want to freeze dependency versions for a release build (for example, when publishing on GitHub), you can run:
+
+    pip freeze | grep -E 'pygame|PyOpenGL|numpy' > requirements.txt
+
+That will write exact version numbers for your current environment.

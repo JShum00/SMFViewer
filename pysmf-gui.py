@@ -89,6 +89,16 @@ class SMFViewer:
 
     # -------------------------------------------------------------------------
 
+    def _submesh_vertex_arrays(self):
+        """Return only non-empty `(n, 8)` vertex arrays from parsed submeshes."""
+        arrays = []
+        for sm in (self.model_data or {}).get("submeshes", []):
+            if sm["vertices"]:
+                arrays.append(np.array(sm["vertices"], dtype=float))
+        return arrays
+
+    # -------------------------------------------------------------------------
+
     def load_smf(self):
         """Open file dialog and load an SMF model."""
         root = Tk()
@@ -109,9 +119,18 @@ class SMFViewer:
         print_smf_summary(path)
 
         # Flatten all vertices for global metrics
-        verts = np.concatenate([np.array(sm["vertices"]) for sm in self.model_data["submeshes"]], axis=0)
+        vertex_arrays = self._submesh_vertex_arrays()
+        if not vertex_arrays:
+            print(f"Warning: no vertex data found in {path}")
+            self.model_center = np.zeros(3)
+            self.model_size = 1.0
+            self.drawing = False
+            self.draw_index = 0
+            return
+
+        verts = np.concatenate(vertex_arrays, axis=0)
         self.model_center = verts[:, :3].mean(axis=0)
-        self.model_size = np.linalg.norm(verts[:, :3].ptp(axis=0))
+        self.model_size = np.linalg.norm(np.ptp(verts[:, :3], axis=0))
 
         total_verts = verts.shape[0]
         total_faces = sum(len(sm["faces"]) for sm in self.model_data["submeshes"])
@@ -254,6 +273,8 @@ class SMFViewer:
                              -self.model_center[1] + 2.0,
                              -self.model_center[2] + 2.0)
                 for sm in self.model_data["submeshes"][:self.draw_index]:
+                    if not sm["vertices"]:
+                        continue
                     verts_np = np.array(sm["vertices"])
                     glBegin(GL_TRIANGLES)
                     for f in sm["faces"]:
@@ -371,4 +392,3 @@ if __name__ == "__main__":
     viewer = SMFViewer()
     print(__doc__)
     viewer.run()
-
