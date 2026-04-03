@@ -43,6 +43,7 @@ class ParsedModel(TypedDict):
 class SMFParser:
     """Parser for Terminal Reality .SMF files."""
 
+    # Submesh names in SMF files resemble identifiers; geometry rows do not.
     _SUBMESH_NAME_RE: re.Pattern[str] = re.compile(r'^[A-Za-z][A-Za-z0-9_]*$')
     _VERTEX_MARKER_RE: re.Pattern[str] = re.compile(r'^v\d+$', re.IGNORECASE)
 
@@ -131,6 +132,8 @@ class SMFParser:
         self.version = None
         self.header = {}
 
+        # Some game assets contain odd bytes, so parse defensively and ignore
+        # decode errors instead of failing the whole model load.
         with open(path, 'r', encoding='utf-8', errors='ignore') as f:
             lines = [ln.strip() for ln in f if ln.strip()]
 
@@ -161,7 +164,8 @@ class SMFParser:
                 if current_submesh:
                     self.submeshes.append(current_submesh)
 
-                # Attempt to read vertex/face count hints from nearby lines
+                # Many files store vertex/face counts a couple of rows after
+                # the submesh label, so probe nearby before parsing geometry.
                 look = i + 1
                 vertex_count: int | None = None
                 face_count: int | None = None
@@ -200,7 +204,9 @@ class SMFParser:
                     material = self._parse_material_line(line)
                     if material is not None:
                         current_submesh["material"] = material
-                    # Only record textures before vertex data begins
+                    # Texture/material metadata should appear before the vertex block.
+                    # Once vertices start, later `.TIF` lines are not treated as
+                    # canonical submesh texture assignments.
                     if len(current_submesh["vertices"]) == 0 and tex:
                         if tex not in current_submesh["textures"]:
                             current_submesh["textures"].append(tex)
@@ -217,6 +223,8 @@ class SMFParser:
 
             # Populate vertex/face count hints if missing
             if current_submesh and current_submesh["vertex_count"] is None and current_submesh["face_count"] is None:
+                # Some SMFs shift the count row around, so scan a small local
+                # window instead of relying on one fixed offset.
                 back_range = max(0, i - 6)
                 found_counts = False
                 for j in range(back_range, min(i + 3, len(lines))):
@@ -236,7 +244,8 @@ class SMFParser:
                     current_submesh['vertex_count'] = None
                     current_submesh['face_count'] = None
 
-            # ---------------- Vertex data (8 floats) ----------------
+            # Standard SMF vertices use 8 floats: position, extra per-vertex
+            # data, and UV coordinates.
             if len(parts) == 8:
                 if current_submesh is None:
                     i += 1
@@ -250,7 +259,7 @@ class SMFParser:
                 i += 1
                 continue
 
-            # ---------------- Face data (3 ints) ----------------
+            # Faces are triangle index triplets into the current submesh.
             if len(parts) == 3:
                 try:
                     f = [int(x) for x in parts]
@@ -264,11 +273,11 @@ class SMFParser:
             # ---------------- Fallback: skip unknown line ----------------
             i += 1
 
-        # Close final submesh
+        # Flush the last active submesh when the file ends without another header.
         if current_submesh:
             self.submeshes.append(current_submesh)
 
-        # Deduplicate texture lists
+        # Preserve first-seen ordering while collapsing duplicate texture refs.
         for sm in self.submeshes:
             sm["textures"] = list(dict.fromkeys(sm.get("textures", [])))
         self.textures = list(dict.fromkeys(self.textures))

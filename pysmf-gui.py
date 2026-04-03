@@ -163,7 +163,8 @@ class SMFViewer:
         glEnable(GL_DEPTH_TEST)
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE)  # start in wireframe mode
 
-        # Button Data
+        # UI hitboxes are rebuilt every frame because layout depends on window
+        # size, hover state, and which sidebar groups are expanded.
         self.button_labels: list[str] = ["Open", "Export", "Wireframe", "Texture", "Exit", "Opacity"]
         self.buttons: list[tuple[int, int, int, int]] = []
         self.hover_index: int | None = None
@@ -187,7 +188,7 @@ class SMFViewer:
         self.material_field_rects: list[tuple[int, int, int, int]] = []
         self.hover_material_field_index: int | None = None
 
-        # Model state
+        # Parsed model state plus session-local selection/inspector state.
         self.model_data: ParsedModel | None = None
         self.model_center: np.ndarray = np.array([0.0, 0.0, 0.0])
         self.model_size: float = 1.0
@@ -206,12 +207,12 @@ class SMFViewer:
         self._state_lock = threading.Lock()
         self._pending_model_load: PendingModelLoad | None = None
 
-        # Drawing state
+        # Render toggles affect only the current viewer session.
         self.wireframe = True
         self.show_texture = False
         self.render_assumed_opacity = True
 
-        # Camera state
+        # Simple orbit camera around the current model center.
         self.camera_radius = 20.0    # how far we orbit from target
         self.camera_angle_az = 25.0  # degrees around Y-axis
         self.camera_height = 4.0     # height above ground
@@ -231,6 +232,8 @@ class SMFViewer:
 
     def _configure_3d_viewport(self) -> None:
         """Reserve space for the toolbar and status bar and update the 3D projection."""
+        # The central 3D viewport excludes the sidebar and inspector; those panels
+        # are drawn afterward as 2D overlays.
         viewport_height = max(1, self.height - self.toolbar_height - self.statusbar_height)
         viewport_width = max(1, self.width - self.sidebar_width - self.inspector_width)
         glViewport(self.sidebar_width, self.statusbar_height, viewport_width, viewport_height)
@@ -365,6 +368,8 @@ class SMFViewer:
                 self.submesh_group_keys.append(None)
                 continue
 
+            # Group by the exact 5-value tuple so repeated material patterns are
+            # easy to compare across multiple submeshes.
             key = tuple(material["values"])
             self.submesh_group_keys.append(key)
             if key not in grouped_names:
@@ -450,6 +455,7 @@ class SMFViewer:
         except (IndexError, ValueError):
             opacity = 1.0
 
+        # The fourth and fifth parsed values are treated as transparency flags.
         def parse_flag(index: int) -> bool:
             try:
                 return float(values[index]) > 0.0
@@ -474,6 +480,8 @@ class SMFViewer:
         raw_value = self.editable_material_values[submesh_index][field_index].strip()
         submesh_name = self.model_data["submeshes"][submesh_index]["name"] if self.model_data is not None else "submesh"
 
+        # Only a subset of the tuple currently drives preview behavior; the other
+        # fields are still editable so they can be inspected and compared.
         try:
             if field_index == 1:
                 parsed = float(raw_value)
@@ -592,6 +600,7 @@ class SMFViewer:
         top = 12
         bottom = toolbar_bottom - 12
 
+        # Keep Exit separated on the far right so it behaves like a global action.
         left_labels = self.button_labels[:-1]
         right_label = self.button_labels[-1]
         left = 16
@@ -803,6 +812,8 @@ class SMFViewer:
 
             scrollable = self.sidebar_content_height > self.sidebar_visible_height
             if scrollable and self.sidebar_visible_height > 0:
+                # Thumb size tracks the visible/content ratio so scrolling scales
+                # naturally with long submesh lists.
                 track_left = self.sidebar_width - scrollbar_width - 8
                 track_right = self.sidebar_width - 8
                 track_top = list_top
@@ -842,6 +853,8 @@ class SMFViewer:
 
             content_row_index = 0
             for group_index, group in enumerate(self.sidebar_groups):
+                # Headers and child rows share one virtual row index so expand/
+                # collapse operations feed directly into scroll math.
                 header_content_top = list_top + content_row_index * row_step
                 header_top = int(header_content_top - self.sidebar_scroll_offset)
                 header_bottom = header_top + row_height
@@ -1098,6 +1111,8 @@ class SMFViewer:
             value_left = panel_inner_left + label_width
             value_right = inspector_right - 20
 
+            # These fields are session-local edits; the original SMF file is not
+            # modified by the live preview workflow.
             for i, value in enumerate(self.editable_material_values[self.selected_submesh_index]):
                 box_top = field_top + i * (field_height + field_gap)
                 box_bottom = box_top + field_height
@@ -1242,8 +1257,19 @@ class SMFViewer:
             with Image.open(texture_path) as image:
                 image_rgba = image.convert("RGBA")
                 return image_rgba.tobytes(), image_rgba.size[0], image_rgba.size[1]
-        except Exception as exc:
-            print(f"Warning: failed to load texture {texture_path}: {exc}")
+        except Exception as pillow_exc:
+            print(f"Warning: Pillow failed to load texture {texture_path}: {pillow_exc}")
+
+        try:
+            # Some legacy TIFF variants load correctly in SDL/pygame even when
+            # Pillow cannot identify them.
+            surface = pygame.image.load(texture_path).convert_alpha()
+            image_bytes = pygame.image.tobytes(surface, "RGBA", False)
+            width, height = surface.get_size()
+            print(f"Loaded texture via pygame fallback: {texture_path}")
+            return image_bytes, width, height
+        except Exception as pygame_exc:
+            print(f"Warning: pygame also failed to load texture {texture_path}: {pygame_exc}")
             return None
 
     # -------------------------------------------------------------------------
@@ -1282,6 +1308,8 @@ class SMFViewer:
         model_dir = os.path.dirname(smf_path)
         model_name = os.path.splitext(os.path.basename(smf_path))[0]
         texture_dir = os.path.normpath(os.path.join(model_dir, "..", "ART"))
+        # The usual Terminal Reality layout is `MODELS/<name>.SMF` paired with
+        # `ART/<name>.TIF`, so try that first before prompting the user.
         candidates = [
             os.path.join(texture_dir, f"{model_name}{ext}")
             for ext in (".TIF", ".tif", ".TIFF", ".tiff")
@@ -1327,6 +1355,8 @@ class SMFViewer:
         if pending is None:
             return
 
+        # OpenGL texture creation must happen on the active render thread, so
+        # background loading stops at decoded bytes and hands them off here.
         if self.texture_id is not None:
             glDeleteTextures([self.texture_id])
             self.texture_id = None
@@ -1346,6 +1376,7 @@ class SMFViewer:
         self.active_material_field_index = None
         self.editable_material_values = []
         self.submesh_preview_states = []
+        # Rebuild transient UI state from the newly loaded model.
         for submesh in self.model_data["submeshes"]:
             material = submesh["material"]
             if material is not None:
@@ -1395,7 +1426,8 @@ class SMFViewer:
         model_data = parser.parse(path)
         texture_payload = self.load_texture(path)
 
-        # Flatten all vertices for global metrics
+        # Flatten submesh-local vertices into one array so camera framing uses
+        # the whole model instead of whichever submesh was parsed last.
         vertex_arrays = [
             np.array(sm["vertices"], dtype=float)
             for sm in model_data["submeshes"]
@@ -1415,6 +1447,8 @@ class SMFViewer:
             total_verts = verts.shape[0]
             total_faces = sum(len(sm["faces"]) for sm in model_data["submeshes"])
 
+        # File dialogs and parsing may happen away from the render loop; stash
+        # the result and let `run()` apply it on the next frame.
         with self._state_lock:
             self._pending_model_load = {
                 "path": path,
@@ -1429,6 +1463,7 @@ class SMFViewer:
     # -------------------------------------------------------------------------
 
     def toggle_wireframe(self) -> None:
+        """Toggle polygon fill mode for the 3D scene."""
         self.wireframe = not self.wireframe
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE if self.wireframe else GL_FILL)
         print("Wireframe mode:", self.wireframe)
@@ -1436,6 +1471,7 @@ class SMFViewer:
     # -------------------------------------------------------------------------
 
     def toggle_texture(self) -> None:
+        """Toggle textured rendering when a decoded texture is available."""
         if self.texture_id is None:
             self.show_texture = False
             print("Texture view: unavailable (no texture loaded)")
@@ -1447,6 +1483,7 @@ class SMFViewer:
     # -------------------------------------------------------------------------
 
     def export_obj(self) -> None:
+        """Prompt for a destination path and export the current model as OBJ."""
         if not self.model_data:
             print("No model loaded to export.")
             return
@@ -1492,6 +1529,7 @@ class SMFViewer:
                 elif event.type == MOUSEMOTION:
                     mx, my = event.pos
                     if self.dragging_sidebar_thumb and self.sidebar_scrollbar_track and self.sidebar_scrollbar_thumb:
+                        # Convert thumb motion back into content-space scroll distance.
                         track_left, track_top, track_right, track_bottom = self.sidebar_scrollbar_track
                         thumb_left, thumb_top, thumb_right, thumb_bottom = self.sidebar_scrollbar_thumb
                         thumb_height = thumb_bottom - thumb_top
@@ -1501,6 +1539,8 @@ class SMFViewer:
                         max_scroll = max(0.0, self.sidebar_content_height - self.sidebar_visible_height)
                         self.sidebar_scroll_offset = 0.0 if travel <= 0 or max_scroll <= 0 else ((clamped_top - track_top) / travel) * max_scroll
                         self._clamp_sidebar_scroll()
+                    # Hover state is recomputed from scratch each frame rather than
+                    # incrementally tracking overlapping hitboxes.
                     self.hover_index = None
                     self.hover_mesh_row_index = None
                     self.hover_mesh_eye_index = None
@@ -1589,6 +1629,8 @@ class SMFViewer:
                         self.selected_submesh_index is not None
                         and self.active_material_field_index is not None
                     ):
+                        # The inspector currently accepts only numeric input because
+                        # preview values are interpreted as floats/flags.
                         allowed_chars = "0123456789.-"
                         filtered = "".join(ch for ch in event.text if ch in allowed_chars)
                         if filtered:
@@ -1626,6 +1668,7 @@ class SMFViewer:
                         self.toggle_texture()
 
             # ---------------- Continuous input ----------------
+            # Camera motion is polled each frame so held keys feel continuous.
             keys = pygame.key.get_pressed()
             if keys[K_LEFT]:
                 self.camera_angle_az -= 1.0
@@ -1646,6 +1689,7 @@ class SMFViewer:
             eye_y = cy + self.camera_height
             eye_z = cz + self.camera_radius * math.sin(theta)
 
+            # The model is re-centered before drawing, so the orbit target stays fixed at the origin.
             gluLookAt(eye_x, eye_y, eye_z, 0, 0, 0, 0, 1, 0)
 
             # ---------------- Draw grid ----------------
@@ -1672,6 +1716,8 @@ class SMFViewer:
                     glDisable(GL_TEXTURE_2D)
                     glColor3f(0.6, 0.8, 1.0)
                 glPushMatrix()
+                # Keep models near the origin so the grid and camera remain useful
+                # across assets with different source coordinates.
                 glTranslatef(-self.model_center[0],
                              -self.model_center[1] + 2.0,
                              -self.model_center[2] + 2.0)
@@ -1683,6 +1729,8 @@ class SMFViewer:
                     alpha = 1.0
                     if textured:
                         if self.render_assumed_opacity and i < len(self.submesh_preview_states):
+                            # Transparency remains heuristic until the full SMF
+                            # material semantics are better understood.
                             preview = self.submesh_preview_states[i]
                             alpha = preview["opacity"]
                             if preview["exterior_transparent"]:

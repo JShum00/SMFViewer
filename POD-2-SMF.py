@@ -30,6 +30,7 @@ def extract_smfs_from_pod(pod_path: str, output_dir: str) -> None:
     print(f"[*] Output directory: {output_dir}\n")
 
     with pod_path.open("rb") as pod_file:
+        # Stream the archive instead of loading it wholesale; POD files can be large.
         for raw_line in pod_file:
             stripped = raw_line.strip()
 
@@ -41,6 +42,8 @@ def extract_smfs_from_pod(pod_path: str, output_dir: str) -> None:
                     smf_count += 1
                     print(f"[+] Finished SMF #{smf_count:04d}: {current_path.name}")
 
+                # Start with a stable placeholder filename and rename later if
+                # the SMF exposes a better texture-derived model name.
                 filename = f"smf_{smf_count:04d}.smf"
                 current_path = output_dir / filename
                 current_file = current_path.open("wb")
@@ -50,7 +53,8 @@ def extract_smfs_from_pod(pod_path: str, output_dir: str) -> None:
                 assert current_path is not None
                 current_file.write(raw_line)
 
-                # Detect texture reference for renaming
+                # Many models include `<MODEL>_bump.TIF`, which is good enough
+                # to promote the placeholder name into something meaningful.
                 if b"_bump.TIF" in stripped:
                     try:
                         text = stripped.decode("utf-8").strip('"')

@@ -30,12 +30,14 @@ def export_to_obj(smf_path, obj_path):
         f.write("# Exported from Python-SMF Viewer\n")
         f.write(f"# Source: {smf_path}\n\n")
 
-        vertex_offset = 0  # Global index offset between submeshes
+        # OBJ indices are file-global, so each submesh needs an accumulated offset.
+        vertex_offset = 0
 
         for sm_index, sm in enumerate(model['submeshes']):
             name = sm.get('name', f"Submesh_{sm_index}")
             verts = np.array(sm['vertices'])
             faces = sm['faces']
+            # Parsed SMF vertices expose UVs in slots 6/7 when present.
             has_uv = (verts.ndim == 2 and verts.shape[1] >= 8)
             vert_count = len(verts)
 
@@ -61,6 +63,7 @@ def export_to_obj(smf_path, obj_path):
                     except (TypeError, ValueError):
                         continue
 
+                    # Skip malformed faces rather than writing broken OBJ topology.
                     if any(vi < 0 or vi >= vert_count for vi in indices):
                         continue
 
@@ -80,6 +83,7 @@ def main():
     """Open file dialogs to select an SMF file and export it as an OBJ."""
     root = Tk()
     root.withdraw()
+    # Tk is only used here to provide native file chooser dialogs.
 
     smf_path = filedialog.askopenfilename(
         title="Select SMF File",

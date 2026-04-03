@@ -28,6 +28,7 @@ def print_smf_summary(path: str):
     for sm in data["submeshes"]:
         vc = sm.get("vertex_count")
         fc = sm.get("face_count")
+        # Show parsed totals alongside header hints when those hints were found.
         vc_display = f"{len(sm['vertices'])}" if vc is None else f"{len(sm['vertices'])} (hdr:{vc})"
         fc_display = f"{len(sm['faces'])}" if fc is None else f"{len(sm['faces'])} (hdr:{fc})"
 
@@ -40,4 +41,3 @@ def print_smf_summary(path: str):
 if __name__ == "__main__":
     # For manual testing
     print_smf_summary("Test.smf")
-
