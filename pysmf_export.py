@@ -8,7 +8,7 @@ The exporter is compatible with Blender and other 3D software.
 """
 
 import numpy as np
-from tkinter import filedialog, Tk
+
 from pysmf import SMFParser
 
 
@@ -81,6 +81,8 @@ def export_to_obj(smf_path, obj_path):
 
 def main():
     """Open file dialogs to select an SMF file and export it as an OBJ."""
+    from tkinter import Tk, filedialog
+
     root = Tk()
     root.withdraw()
     # Tk is only used here to provide native file chooser dialogs.

@@ -1,0 +1,262 @@
+{
+    "4RUNNERLTD": [
+        "T4RLIM2.TRK",
+        "T4RLIM4.TRK"
+    ],
+    "4RUNNERSR5": [
+        "T4RSR52.TRK",
+        "T4SR54.TRK",
+        "T4SR542.TRK",
+        "T4SR543.TRK"
+    ],
+    "ARBJEEP": [
+        "AJWS.TRK"
+    ],
+    "ARBMONSTER": [
+        "AMT.TRK"
+    ],
+    "BLAZERLS": [
+        "CBLS4D2.TRK",
+        "CBLS4D4.TRK"
+    ],
+    "BLAZERLT": [
+        "CBLT4D2.TRK",
+        "CBLT4D4.TRK"
+    ],
+    "BLAZERZR2": [
+        "CBLS24.TRK",
+        "CBLS242.TRK",
+        "CBLS243.TRK",
+        "CBLS2D2.TRK"
+    ],
+    "CHEV1500R2": [
+        "CSLSRS2.TRK",
+        "CSLSRS4.TRK",
+        "CSRS2.TRK",
+        "CSRS4.TRK"
+    ],
+    "CHEV1500X2": [
+        "CSE3S2.TRK",
+        "CSLSE3S2.TRK",
+        "CSLTE3S2.TRK"
+    ],
+    "CHEV1500X4": [
+        "CSE3S4.TRK",
+        "CSE3S42.TRK",
+        "CSE3S43.TRK",
+        "CSLSE3S4.TRK",
+        "CSLTE3S4.TRK"
+    ],
+    "CHEVTROPHY": [
+        "CTTT2.TRK"
+    ],
+    "DAKOTAEXCB": [
+        "DDCC2.TRK"
+    ],
+    "DAKOTAEXT4X4": [
+        "DDCC4.TRK",
+        "DDCC42.TRK",
+        "DDCC43.TRK"
+    ],
+    "DAKOTAQUAD": [
+        "DDQC2.TRK"
+    ],
+    "DAKOTAQUAD4X4": [
+        "DDQC4.TRK"
+    ],
+    "DAKOTATPHY": [
+        "DDRT.TRK"
+    ],
+    "DODGERAM": [
+        "DR1RS2.TRK",
+        "DR1RS4.TRK",
+        "DR1RS42.TRK",
+        "DR1RS43.TRK"
+    ],
+    "DURANGO": [
+        "DDSLT2.TRK",
+        "DDSLT4.TRK",
+        "DDSLT42.TRK",
+        "DDSLT43.TRK",
+        "DDSLTP2.TRK",
+        "DDSLTP4.TRK"
+    ],
+    "FRONTIER": [
+        "FRSE6D2.TRK"
+    ],
+    "GMC1500TPY": [
+        "GS1TT.TRK"
+    ],
+    "GMCJIMMY": [
+        "GJST4D2.TRK",
+        "GJST4D22.TRK",
+        "GJST4D23.TRK",
+        "GJST4D4.TRK"
+    ],
+    "GMCR": [
+        "SISLERS2.TRK",
+        "SISLERS4.TRK",
+        "SISLRS2.TRK",
+        "SISLRS4.TRK"
+    ],
+    "GMCYUK": [
+        "GYS2.TRK",
+        "GYS4.TRK"
+    ],
+    "INFINITQX4": [
+        "IQX42.TRK",
+        "IQX441.TRK",
+        "IQX442.TRK",
+        "IQX443.TRK"
+    ],
+    "JEEPGRANDC": [
+        "JGCLTD2.TRK",
+        "JGCLTD4.TRK",
+        "JGCLTD42.TRK",
+        "JGCLTD43.TRK"
+    ],
+    "JEEPLIBERT": [
+        "JLS2.TRK",
+        "JLS4.TRK",
+        "JLS42.TRK",
+        "JLS43.TRK"
+    ],
+    "JEEPWRANG": [
+        "JWS4.TRK",
+        "JWS42.TRK",
+        "JWS43.TRK"
+    ],
+    "K5BLAZER": [
+        "CBK54.TRK"
+    ],
+    "LANDCRUISR": [
+        "TLC4.TRK"
+    ],
+    "LEXUSLX470": [
+        "LLX470.TRK",
+        "LLX4702.TRK",
+        "LLX4703.TRK"
+    ],
+    "LEXUSRX300": [
+        "LRX3002.TRK",
+        "LRX300A.TRK",
+        "LRX300A2.TRK",
+        "LRX300A3.TRK"
+    ],
+    "MONTERO": [
+        "MMLA.TRK",
+        "MMLA2.TRK",
+        "MMLA3.TRK"
+    ],
+    "NISSANFRONTIERSC": [
+        "FRSC2.TRK",
+        "FRSC4.TRK",
+        "FRSC42.TRK",
+        "FRSC43.TRK"
+    ],
+    "NISSANXTER": [
+        "XTERSE2.TRK",
+        "XTERSE4.TRK",
+        "XTERXE24.TRK",
+        "XTERXE26.TRK",
+        "XTERXE4.TRK",
+        "XTERXE42.TRK",
+        "XTERXE43.TRK"
+    ],
+    "RACE4RN": [
+        "T4R4.TRK"
+    ],
+    "RACECHEROK": [
+        "JGCRSUV.TRK"
+    ],
+    "RACEDUR": [
+        "DDRE4.TRK"
+    ],
+    "RACEFRONT": [
+        "FRRT.TRK"
+    ],
+    "RACELIB": [
+        "JLRE4.TRK"
+    ],
+    "RACELX": [
+        "LLX470RE.TRK"
+    ],
+    "RACEQX4": [
+        "IQX4RE4.TRK"
+    ],
+    "RACEXTERRA": [
+        "XTERRT.TRK"
+    ],
+    "RACEZR2": [
+        "CBRE4.TRK"
+    ],
+    "RAMTROPHY": [
+        "DRTT.TRK"
+    ],
+    "SIERRA150X": [
+        "GS1E3S2.TRK",
+        "SISLE3S2.TRK"
+    ],
+    "SIERRAX4X4": [
+        "GS1E3S4.TRK",
+        "GS1E3S42.TRK",
+        "GS1E3S43.TRK",
+        "SISLE3S4.TRK"
+    ],
+    "SUBURBAN": [
+        "CSC152.TRK",
+        "CSC252.TRK",
+        "CSK154.TRK",
+        "CSK1542.TRK",
+        "CSK1543.TRK",
+        "CSK254.TRK"
+    ],
+    "TACOMA": [
+        "TTAX2.TRK",
+        "TTAX4.TRK",
+        "TTAXL4.TRK",
+        "TTAXV62.TRK",
+        "TTAXV64.TRK",
+        "TTAXV642.TRK",
+        "TTAXV643.TRK",
+        "TTPX2.TRK",
+        "TTPXV62.TRK"
+    ],
+    "TAHOE": [
+        "CTA2.TRK",
+        "CTA4.TRK",
+        "CTAZ714.TRK"
+    ],
+    "TOYOTARACE": [
+        "TTTT2.TRK"
+    ],
+    "TOYOTARAV4": [
+        "TRAV4D2.TRK",
+        "TRAV4D4.TRK",
+        "TRAV4D42.TRK",
+        "TRAV4D43.TRK"
+    ],
+    "TRAILBLAZER": [
+        "CBT2.TRK",
+        "CBT4.TRK"
+    ],
+    "TROPHYMONT": [
+        "MPRT2D.TRK"
+    ],
+    "TUNDRA": [
+        "TTULAC2.TRK",
+        "TTULAC4.TRK",
+        "TTUSAC2.TRK",
+        "TTUSAC4.TRK",
+        "TTUSAC42.TRK",
+        "TTUSAC43.TRK"
+    ],
+    "YUKONXLR": [
+        "GYX152.TRK",
+        "GYX154.TRK",
+        "GYX1542.TRK",
+        "GYX1543.TRK",
+        "GYX252.TRK",
+        "GYX254.TRK"
+    ]
+}

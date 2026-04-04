@@ -37,6 +37,12 @@ PySMF now parses the format with reasonable confidence for the core geometry pat
 - vertex rows with 8 values
 - triangle rows with 3 indices
 
+The current parser is intentionally defensive:
+- blank lines are skipped
+- decode errors are ignored instead of aborting the load
+- count hints are probed near the submesh header and scanned again near geometry if needed
+- duplicate texture references are collapsed while preserving first-seen order
+
 One important parser correction made during this project:
 
 ```text
@@ -72,8 +78,8 @@ What PySMF currently interprets with confidence:
 - `Body` → submesh name
 - `490,1,598,0` → count hint line containing at least vertex and face counts
 - `v1` → mesh-section marker
-- `4RUNNERLTD.TIF` → texture reference
-- `"4RUNNERLTD_bump.TIF"` → additional texture/bump reference
+- `4RUNNERLTD.TIF` → primary texture reference stored with the material tuple
+- `"4RUNNERLTD_bump.TIF"` → additional texture/bump reference preserved separately
 - 8-value rows → vertex position, normal, UV
 - 3-value rows → triangle indices
 
@@ -109,10 +115,11 @@ This fits the model geometry and exports correctly to OBJ in current testing.
 The toolkit currently understands several texture-related behaviors:
 
 - `.TIF` / `.TIFF` filenames are preserved from the SMF
-- the viewer tries to load a matching texture from `../ART`
+- the viewer tries to load a matching texture from the configured texture directory, or `../ART` by default
 - if automatic lookup fails, the viewer can prompt for manual selection
 - TIFF image alpha is used by the viewer when texture mode is active
 - bump-map references are preserved as filenames, but no bump mapping is implemented yet
+- only texture references encountered before vertex rows are treated as the canonical submesh texture assignment
 
 ---
 
@@ -130,7 +137,7 @@ PySMF now preserves this as structured data:
 - the texture filename
 - the original raw line
 
-This is exposed directly in the GUI for research.
+This is exposed directly in the GUI for research, grouped by exact tuple pattern, and can be edited in-session for heuristic preview experiments.
 
 ---
 
@@ -160,6 +167,7 @@ These are **working hypotheses**, not settled facts:
 - glass and light meshes clearly use distinct tuple families
 - some values likely affect transparency or blending behavior
 - at least one value may act more like a material-class selector than a simple scalar opacity
+- the current viewer preview groups tuples into coarse roles such as body paint, interior glass, exterior glass, light overlays, and opaque neutral parts
 
 ---
 
@@ -179,12 +187,14 @@ The current GUI is intentionally built as a research tool, not just a renderer.
 
 It now provides:
 - grouped mesh tree with per-submesh visibility toggles
+- per-group visibility toggles
 - submesh selection
 - right-side inspector
 - parsed material tuple display
 - editable session-only values
 - committed heuristic preview state
 - model-wide exact-tuple grouping so matching parts can be compared quickly
+- a Specs pane that can correlate the loaded model with mapped `.TRK` data
 
 The heuristic preview path exists only to help exploration. It should not be treated as proof of how the game renders these materials.
 
@@ -196,7 +206,7 @@ The viewer currently offers an optional experimental preview path that assumes:
 - Value 2 can be treated like an opacity multiplier
 - Values 4 and 5 can be treated like local transparency toggles
 
-This is explicitly heuristic. The `Opacity` toolbar toggle can disable these assumptions and render textured meshes without those SMF-based opacity adjustments.
+This is explicitly heuristic. The `Opacity` toolbar toggle can disable these assumptions and render textured meshes without those SMF-based opacity adjustments. Separate `Shading` and `Shadows` toggles exist for viewer-side lighting only; they are not claims about original game behavior.
 
 ---
 
