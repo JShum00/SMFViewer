@@ -34,3 +34,7 @@ htmlcov/
 .vscode/
 .DS_Store
 Thumbs.db
+
+# Local viewer state
+viewer_settings.json
+viewersettings.json
